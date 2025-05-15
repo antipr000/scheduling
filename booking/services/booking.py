@@ -6,12 +6,15 @@ from booking.models.services import Services
 from booking.models.room_supported_services import RoomSupportedServices
 from booking.dto.request.book import BookingRequestDTO
 from booking.dto.response.book import BookingResponseDTO
+from booking.utils.lock import with_lock
+from booking.utils.enums import LockEntity
 from datetime import datetime
 from django.db.models import Q
 from typing import List, Optional
 
 
 class BookingService:
+    @with_lock(LockEntity.PROVIDER)
     def create_booking(
         self, service_id: str, date: str, booking_request: BookingRequestDTO
     ) -> BookingResponseDTO:

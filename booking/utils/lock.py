@@ -31,6 +31,7 @@ def check_if_lock_exists(
         ),
         None,
     )
+    return lock is not None
 
 
 def with_lock(entity: LockEntity, max_wait_time: int = 30):
@@ -42,17 +43,19 @@ def with_lock(entity: LockEntity, max_wait_time: int = 30):
                 param_dtos = [
                     ProviderLockParamsDTO.from_dict(param) for param in params
                 ]
-                date = kwargs["date"]
-                booking_request = kwargs["booking_request"]
-                service_id = kwargs["service_id"]
+                service_id = args[1]  # service_id is second parameter
+                date = args[2]  # date is third parameter
+                booking_request = args[3]  # booking_request is fourth parameter
                 service = Services.objects.get(id=service_id)
                 start_time = time.time()
+                print(f"Checking if lock exists for {entity.value}")
                 while check_if_lock_exists(param_dtos, date, booking_request, service):
                     if time.time() - start_time > max_wait_time:
                         raise Exception("Failed to acquire lock")
                     time.sleep(1)
 
                 # Acquire lock
+                print(f"Acquiring lock for {entity.value}")
                 lock_params = ProviderLockParamsDTO(
                     provider_id=booking_request.provider_id,
                     date=date,
@@ -65,6 +68,7 @@ def with_lock(entity: LockEntity, max_wait_time: int = 30):
 
                 resp = func(*args, **kwargs)
                 # Release lock
+                print(f"Releasing lock for {entity.value}")
                 lock.delete()
                 return resp
 

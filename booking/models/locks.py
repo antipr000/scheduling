@@ -7,6 +7,8 @@ class Locks(BaseModel):
     name: str = models.CharField(max_length=255)
     params: str = models.JSONField()
 
+    id_prefix = "lck"
+
     def __str__(self):
         return self.name
 

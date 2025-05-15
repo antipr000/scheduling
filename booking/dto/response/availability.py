@@ -1,6 +1,7 @@
 from booking.dto.base import BaseDTO
 from booking.models.rooms import Rooms
 from booking.models.services import Services
+from datetime import datetime
 
 
 class AvailabilitySlotDTO(BaseDTO):
@@ -12,10 +13,10 @@ class AvailabilitySlotDTO(BaseDTO):
 
     @staticmethod
     def from_room_and_service(
-        date: str, start_time: int, room: Rooms, service: Services
+        date: datetime, start_time: int, room: Rooms, service: Services
     ) -> "AvailabilitySlotDTO":
         return AvailabilitySlotDTO(
-            date=date,
+            date=date.strftime("%Y-%m-%d"),
             start_time=start_time,
             end_time=start_time + service.duration,
             provider_name=room.provider.name,

@@ -1,20 +1,18 @@
 version: '3.8'
 
 services:
-  db:
-    container_name: db
+  test-db:
+    container_name: test-db
     image: mysql:8.0
-    restart: always
     environment:
       MYSQL_DATABASE: scheduling
       MYSQL_USER: scheduling
       MYSQL_PASSWORD: scheduling
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - "3307:3306"  # Different port to avoid conflict with dev database
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
@@ -22,17 +20,15 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
-    container_name: app
+  test:
+    container_name: test-app
     build:
       context: ../
       dockerfile: deploy/Dockerfile
     environment:
-      MYSQL_HOST: db
-    ports:
-      - "8000:8000"
+      MYSQL_HOST: test-db
     depends_on:
-      db:
+      test-db:
         condition: service_healthy
-volumes:
-  mysql_data:
+    command: >
+        bash -c "DJANGO_SETTINGS_MODULE=scheduling.test_settings python manage.py test tests"

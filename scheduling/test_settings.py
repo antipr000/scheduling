@@ -1,4 +1,5 @@
 from .settings import *
+import os
 
 # Use the same database for tests
 DATABASES = {
@@ -7,7 +8,7 @@ DATABASES = {
         "NAME": "scheduling",
         "USER": "scheduling",
         "PASSWORD": "scheduling",
-        "HOST": "localhost",
+        "HOST": os.getenv("MYSQL_HOST", "localhost"),
         "PORT": "3306",
         "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
         "TEST": {

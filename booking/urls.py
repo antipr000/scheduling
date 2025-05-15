@@ -15,5 +15,5 @@ urlpatterns = [
         AvailabilitySlotsView.as_view(),
         name="availability_slots",
     ),
-    path("booking/<str:user_id>", BookingView.as_view(), name="booking"),
+    path("booking/<str:user_id>", BookingView.as_view(), name="bookings"),
 ]

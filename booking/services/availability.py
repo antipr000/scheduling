@@ -22,7 +22,7 @@ class AvailabilityService:
                 booking
                 for booking in bookings
                 if booking.room.id == room.id
-                and booking.date == date
+                and booking.date.date() == date.date()
                 and (
                     (
                         booking.start_time <= start_time
@@ -64,7 +64,8 @@ class AvailabilityService:
 
         # Now we will loop through each day and check if there is any room available for that day
         available_dates = set()
-        for date in range(start_date, end_date, timedelta(days=1)):
+        date = start_date
+        while date < end_date:
             for room in rooms:
                 for start_time in range(0, 24 * 60, duration):
                     end_time = start_time + duration
@@ -75,6 +76,8 @@ class AvailabilityService:
 
                     if is_available:
                         available_dates.add(date.strftime("%Y-%m-%d"))
+
+            date += timedelta(days=1)
 
         return list(available_dates)
 

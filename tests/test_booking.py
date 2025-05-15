@@ -5,8 +5,8 @@ from datetime import datetime
 from booking.models.bookings import Bookings
 
 
-class BookingIntegrationTest(BaseIntegrationTest):
-    """Integration tests for booking functionality."""
+class BookingCreateIntegrationTest(BaseIntegrationTest):
+    """Integration tests for booking creation."""
 
     def test_create_booking_success(self):
         """Test creating a new booking."""
@@ -165,3 +165,58 @@ class BookingIntegrationTest(BaseIntegrationTest):
             user_id=user_2.id, service_id=service_id
         ).first()
         self.assertNotEqual(booking_1.room.id, booking_2.room.id)
+
+
+class BookingListIntegrationTest(BaseIntegrationTest):
+    """Integration tests for booking list."""
+
+    def test_list_bookings_success(self):
+        """Test listing bookings successfully."""
+        # Set up the test data
+        user = self.users[0]
+
+        provider = next(
+            (
+                provider
+                for provider in self.providers
+                if provider.name == "Massage Therapy Center"
+            ),
+            None,
+        )
+
+        service = next(
+            (
+                service
+                for service in self.services
+                if service.name == "Deep Tissue Massage"
+            ),
+            None,
+        )
+
+        service_id = service.id
+        date = datetime.now().strftime("%Y-%m-%d")
+
+        url = reverse(
+            "availability_slots",
+            kwargs={"service_id": service_id, "date": date},
+        )
+        data = {
+            "provider_id": provider.id,
+            "user_id": user.id,
+            "start_time": 540,  # 9:00 AM
+        }
+
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # List bookings
+        url = reverse("bookings", kwargs={"user_id": user.id})
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["user_id"], user.id)
+        self.assertEqual(response.data[0]["service_name"], service.name)
+        self.assertEqual(response.data[0]["provider_name"], provider.name)
+        self.assertEqual(response.data[0]["start_time"], 540)
+        self.assertEqual(response.data[0]["end_time"], 630)
+        self.assertEqual(response.data[0]["date"], date)

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import pymysql
+import os
 
 pymysql.install_as_MySQLdb()
 
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_yasg",
     "booking",
 ]
 
@@ -84,7 +86,7 @@ DATABASES = {
         "NAME": "scheduling",
         "USER": "scheduling",
         "PASSWORD": "scheduling",
-        "HOST": "localhost",
+        "HOST": os.getenv("MYSQL_HOST", "localhost"),
         "PORT": "3306",
         "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
         "TEST": {

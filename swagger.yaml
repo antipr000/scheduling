@@ -1,0 +1,189 @@
+openapi: 3.0.0
+info:
+  title: Booking API
+  version: 1.0.0
+  description: API for managing service bookings and availability
+
+servers:
+  - url: /api/v1
+    description: API v1 base URL
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+
+  /service/{service_id}/availability:
+    get:
+      summary: Get available dates for a service
+      parameters:
+        - name: service_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of available dates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: date
+                  example: "2024-03-20"
+
+  /service/{service_id}/availability/{date}:
+    get:
+      summary: Get available slots for a specific date
+      parameters:
+        - name: service_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of available slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailabilitySlot'
+    post:
+      summary: Create a booking for a specific slot
+      parameters:
+        - name: service_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /booking/{user_id}:
+    get:
+      summary: Get all bookings for a user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of user's bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+
+components:
+  schemas:
+    AvailabilitySlot:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2024-03-20"
+        start_time:
+          type: integer
+          description: Start time in minutes since midnight
+          example: 540
+        end_time:
+          type: integer
+          description: End time in minutes since midnight
+          example: 600
+        provider_name:
+          type: string
+          example: "Dr. Smith"
+        service_name:
+          type: string
+          example: "General Checkup"
+
+    BookingRequest:
+      type: object
+      required:
+        - provider_id
+        - user_id
+        - start_time
+      properties:
+        provider_id:
+          type: string
+        user_id:
+          type: string
+        start_time:
+          type: integer
+          description: Start time in minutes since midnight
+
+    BookingResponse:
+      type: object
+      properties:
+        booking_id:
+          type: string
+        provider_name:
+          type: string
+        service_name:
+          type: string
+        user_id:
+          type: string
+        email:
+          type: string
+          format: email
+        start_time:
+          type: integer
+          description: Start time in minutes since midnight
+        end_time:
+          type: integer
+          description: End time in minutes since midnight
+        date:
+          type: string
+          format: date

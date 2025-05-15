@@ -33,6 +33,7 @@ class BookingService:
             for room_supported_service in room_supported_services
         ]
 
+        room_ids = [room.id for room in rooms]
         # Check if the room is available for the given date and time
         # First fetch all bookings for these set of rooms
         # Check for overlap:
@@ -40,12 +41,12 @@ class BookingService:
         # Case 2: Existing booking starts during our slot
         existing_bookings: List[Bookings] = (
             Bookings.objects.filter(
-                room__in=rooms,
+                room__id__in=room_ids,
                 date=booking_date,
             )
             .filter(
-                Q(start_time__lt=start_time, end_time__gt=start_time)
-                | Q(start_time__lt=end_time, end_time__gt=end_time)
+                Q(start_time__lte=start_time, end_time__gte=start_time)
+                | Q(start_time__lte=end_time, end_time__gte=end_time)
             )
             .select_related("room")
             .all()

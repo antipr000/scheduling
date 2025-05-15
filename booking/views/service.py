@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from booking.services.availability import AvailabilityService
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from booking.services.booking import BookingService
 from booking.dto.request.book import BookingRequestDTO
 from booking.dto.response.book import BookingResponseDTO
@@ -25,9 +25,14 @@ class AvailabilitySlotsView(APIView):
         return Response(data=slot_dicts, status=HTTP_200_OK)
 
     def post(self, request, service_id, date):
-        booking_service = BookingService()
-        booking_request: BookingRequestDTO = BookingRequestDTO.from_dict(request.data)
-        booking_response = booking_service.create_booking(
-            service_id, date, booking_request
-        )
-        return Response(data=booking_response.model_dump(), status=HTTP_200_OK)
+        try:
+            booking_service = BookingService()
+            booking_request: BookingRequestDTO = BookingRequestDTO.from_dict(
+                request.data
+            )
+            booking_response = booking_service.create_booking(
+                service_id, date, booking_request
+            )
+            return Response(data=booking_response.model_dump(), status=HTTP_201_CREATED)
+        except ValueError as e:
+            return Response(data={"error": str(e)}, status=HTTP_400_BAD_REQUEST)

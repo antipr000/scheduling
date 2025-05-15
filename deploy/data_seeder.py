@@ -1,15 +1,3 @@
-import os
-import django
-from typing import List
-import sys
-
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(project_root)
-
-# Set up Django environment
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "scheduling.settings")
-django.setup()
-
 from booking.models.providers import Providers
 from booking.models.services import Services
 from booking.models.services_offered import ServicesOffered
@@ -17,7 +5,7 @@ from booking.models.rooms import Rooms
 from booking.models.room_supported_services import RoomSupportedServices
 from booking.models.users import Users
 from booking.models.bookings import Bookings
-
+from typing import List
 
 provider_service_map = {
     "Spa & Wellness Center": [
@@ -135,7 +123,7 @@ def seed_users():
     return created_users
 
 
-def main():
+def seed_data():
     print("Starting data seeding...")
 
     # Clear existing data
@@ -156,7 +144,3 @@ def main():
     seed_users()
 
     print("Data seeding completed!")
-
-
-if __name__ == "__main__":
-    main()
